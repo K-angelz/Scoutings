@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scouting Notes</title>
+  <style>
+    body {
+      background: #0f172a;
+      color: #e5e7eb;
+      font-family: system-ui;
+      padding: 40px;
+    }
+
+    .container { max-width: 800px; }
+
+    h1, h2 { margin-bottom: 10px; }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #9ca3af;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: #020617;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 12px;
+      color: white;
+    }
+
+    textarea { min-height: 100px; }
+
+    button {
+      margin-top: 10px;
+      background: #020617;
+      border: 1px solid #1e293b;
+      padding: 10px 18px;
+      border-radius: 999px;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover { background: #1e293b; }
+
+    .note {
+      background: #020617;
+      border: 1px solid #1e293b;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+
+    .note-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .red { background: #ef4444; }
+    .green { background: #22c55e; }
+    .blue { background: #3b82f6; }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Scouting Notes</h1>
+
+  <!-- ADMIN -->
+  <h2>Event Setup</h2>
+  <label>Event Key</label>
+  <input id="eventKey" placeholder="2026gadal">
+
+  <label>API Key</label>
+  <input id="apiKey" placeholder="Your Blue Alliance API Key">
+
+  <button onclick="pullMatches()">Pull Event Data</button>
+
+  <!-- CREATE NOTE -->
+  <h2 style="margin-top:30px;">Create Note</h2>
+
+  <label>Match Number</label>
+  <select id="matchSelect" onchange="updateTeams()">
+    <option>Select match</option>
+  </select>
+
+  <label>Team</label>
+  <select id="teamSelect">
+    <option>Select team</option>
+  </select>
+
+  <label>Type</label>
+  <select id="type">
+    <option value="red">🔴 Bad</option>
+    <option value="green">🟢 Good</option>
+    <option value="blue">🔵 Info</option>
+  </select>
+
+  <label>Notes</label>
+  <textarea id="content"></textarea>
+
+  <button onclick="addNote()">Save Note</button>
+
+  <!-- SEARCH -->
+  <h2 style="margin-top:40px;">Search Notes</h2>
+  <input id="search" placeholder="Enter team or match number (e.g. 1771 or 12)">
+  <button onclick="searchNotes()">Search</button>
+
+  <div id="results"></div>
+</div>
+
+<script>
+let notes = JSON.parse(localStorage.getItem("notes")) || [];
+let matches = [];
+
+// Fetch matches from Blue Alliance
+async function pullMatches() {
+  let eventKey = document.getElementById("eventKey").value.trim();
+  let apiKey = document.getElementById("apiKey").value.trim();
+
+  if (!eventKey || !apiKey) {
+    alert("Enter event key and API key");
+    return;
+  }
+
+  try {
+    let res = await fetch(`https://www.thebluealliance.com/api/v3/event/${eventKey}/matches`, {
+      headers: { "X-TBA-Auth-Key": apiKey }
+    });
+
+    matches = await res.json();
+
+    let matchSelect = document.getElementById("matchSelect");
+    matchSelect.innerHTML = "<option>Select match</option>";
+
+    matches.forEach(match => {
+      let opt = document.createElement("option");
+      opt.value = match.match_number;
+      opt.textContent = "Match " + match.match_number;
+      matchSelect.appendChild(opt);
+    });
+
+    alert("Matches loaded!");
+  } catch (err) {
+    alert("Error loading matches");
+    console.error(err);
+  }
+}
+
+// Update teams dropdown when match changes
+function updateTeams() {
+  let matchNumber = document.getElementById("matchSelect").value;
+  let teamSelect = document.getElementById("teamSelect");
+  teamSelect.innerHTML = "<option>Select team</option>";
+
+  let match = matches.find(m => m.match_number == matchNumber);
+  if (!match) return;
+
+  let teams = [
+    ...match.alliances.red.team_keys,
+    ...match.alliances.blue.team_keys
+  ];
+
+  teams.forEach(team => {
+    let clean = team.replace("frc", "");
+    let opt = document.createElement("option");
+    opt.value = clean;
+    opt.textContent = clean;
+    teamSelect.appendChild(opt);
+  });
+}
+
+// Save note locally
+function addNote() {
+  let team = document.getElementById("teamSelect").value;
+  let match = document.getElementById("matchSelect").value;
+  let content = document.getElementById("content").value.trim();
+  let type = document.getElementById("type").value;
+
+  if (!team || !match) {
+    alert("Select team and match");
+    return;
+  }
+  if (!content) {
+    alert("Enter some notes");
+    return;
+  }
+
+  let title = `${team} match ${match}`;
+
+  notes.push({ title, content, type });
+  localStorage.setItem("notes", JSON.stringify(notes));
+
+  alert("Saved!");
+  document.getElementById("content").value = "";
+}
+
+// Render notes array to UI
+function renderNotes(notesArray) {
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+
+  if (notesArray.length === 0) {
+    resultsDiv.innerHTML = "<p>No notes found.</p>";
+    return;
+  }
+
+  notesArray.forEach(note => {
+    let div = document.createElement("div");
+    div.className = "note";
+
+    div.innerHTML = `
+      <div class="note-title">
+        <span class="dot ${note.type}"></span>
+        ${note.title}
+      </div>
+      <div>${note.content.replace(/\n/g, "<br>")}</div>
+    `;
+
+    resultsDiv.appendChild(div);
+  });
+}
+
+// Search notes by team or match number
+function searchNotes() {
+  let query = document.getElementById("search").value.trim();
+  if (!query) {
+    renderNotes(notes);
+    return;
+  }
+
+  let filtered = notes.filter(note => {
+    let numbers = note.title.match(/\d+/g);
+    return numbers && numbers.some(num => num === query);
+  });
+
+  renderNotes(filtered);
+}
+
+// Show all saved notes on page load
+renderNotes(notes);
+</script>
+
+</body>
+</html>
