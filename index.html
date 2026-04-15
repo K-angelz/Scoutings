@@ -2,73 +2,91 @@
 <html>
 <head>
   <title>Scouting Notes</title>
-  <style>
-    body {
-      background: #0f172a;
-      color: #e5e7eb;
-      font-family: system-ui;
-      padding: 40px;
-    }
+<style>
+  body {
+    background: #0f172a;
+    color: #e5e7eb;
+    font-family: system-ui;
 
-    .container { max-width: 800px; }
+    /* Center everything on screen */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 
-    h1, h2 { margin-bottom: 10px; }
+    margin: 0;
+  }
 
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      color: #9ca3af;
-    }
+  .container {
+    max-width: 800px;
+    width: 100%;
+    
+    /* Center horizontally (fallback) */
+    margin: 0 auto;
 
-    input, textarea, select {
-      width: 100%;
-      background: #020617;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
-      padding: 12px;
-      color: white;
-    }
+    /* Card look */
+    background: #020617;
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid #1e293b;
+  }
 
-    textarea { min-height: 100px; }
+  h1, h2 { margin-bottom: 10px; }
 
-    button {
-      margin-top: 10px;
-      background: #020617;
-      border: 1px solid #1e293b;
-      padding: 10px 18px;
-      border-radius: 999px;
-      color: white;
-      cursor: pointer;
-    }
+  label {
+    display: block;
+    margin: 10px 0 5px;
+    color: #9ca3af;
+  }
 
-    button:hover { background: #1e293b; }
+  input, textarea, select {
+    width: 100%;
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 12px;
+    color: white;
+  }
 
-    .note {
-      background: #020617;
-      border: 1px solid #1e293b;
-      padding: 15px;
-      border-radius: 12px;
-      margin-top: 10px;
-    }
+  textarea { min-height: 100px; }
 
-    .note-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: bold;
-    }
+  button {
+    margin-top: 10px;
+    background: #020617;
+    border: 1px solid #1e293b;
+    padding: 10px 18px;
+    border-radius: 999px;
+    color: white;
+    cursor: pointer;
+  }
 
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
+  button:hover { background: #1e293b; }
 
-    .red { background: #ef4444; }
-    .green { background: #22c55e; }
-    .blue { background: #3b82f6; }
+  .note {
+    background: #020617;
+    border: 1px solid #1e293b;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 10px;
+  }
 
-  </style>
+  .note-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .red { background: #ef4444; }
+  .green { background: #22c55e; }
+  .blue { background: #3b82f6; }
+</style>
 </head>
 <body>
 
